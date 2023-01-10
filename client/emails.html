@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta viewport="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/emails.css">
+    <link rel="stylesheet" href="css/normalize.css">
+    <script type="module" src="js/app.js"></script>
+    <title>Emails</title>
+</head>
+<body>
+
+    <!-- Un contendor que dentro tiene una tabla y un formulario, uno a cada lado.
+    La tabla muestra los campos: subject y content de los emails.
+    El formulario pide los campos: subject y email.
+    De esta forma montamos un panel que nos permite añadir emails a la tabla. -->
+
+    <header>
+        <div class="logo">
+            <svg viewBox="0 0 24 24">
+                <path fill="currentColor" d="M16 17V19H2V17S2 13 9 13 16 17 16 17M12.5 7.5A3.5 3.5 0 1 0 9 11A3.5 3.5 0 0 0 12.5 7.5M15.94 13A5.32 5.32 0 0 1 18 17V19H22V17S22 13.37 15.94 13M15 4A3.39 3.39 0 0 0 13.07 4.59A5 5 0 0 1 13.07 10.41A3.39 3.39 0 0 0 15 11A3.5 3.5 0 0 0 15 4Z" />
+            </svg>
+        </div>
+        <div class="title">
+            <h1>Send Emails</h1>
+        </div>
+        <div class="menu">
+            <div class="emails">
+                <button>emails</button>
+            </div>
+            <div class="customers">
+                <button>customers</button>
+            </div>
+            <div class="logout">
+                <button>logout</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="table">
+            <div class="table-title">
+                <h1>Emails</h1>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Subject</th>
+                        <th>Content</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Subject 1</td>
+                        <td>Content 1</td>
+                    </tr>
+                    <tr>
+                        <td>Subject 2</td>
+                        <td>Content 2</td>
+                    </tr>
+                    <tr>
+                        <td>Subject 3</td>
+                        <td>Content 3</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="filter">
+            <h1>Add email</h1>
+            <form action="api/admin/emails/" method="POST">
+                <label>Subject</label>
+                <input type="text" name="subject" placeholder="Subject">
+                <label>Content</label>
+                <input type="email" name="content" placeholder="Email">
+                <div class="save-delete-container">
+                    <div class="save-button">
+                        <button type="submit">Save</button>
+                    </div>
+                    <div class="delete-button">
+                        <button type="submit">Delete</button>
+                    </div>
+                </div>
+                <div class="send-container">
+                    <button type="submit">Send</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta viewport="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/customers.css">
+    <link rel="stylesheet" href="css/normalize.css">
+    <script type="module" src="js/app.js"></script>
+    <title>Customers</title>
+</head>
+<body>
+
+    <header>
+        <div class="logo">
+            <svg viewBox="0 0 24 24">
+                <path fill="currentColor" d="M16 17V19H2V17S2 13 9 13 16 17 16 17M12.5 7.5A3.5 3.5 0 1 0 9 11A3.5 3.5 0 0 0 12.5 7.5M15.94 13A5.32 5.32 0 0 1 18 17V19H22V17S22 13.37 15.94 13M15 4A3.39 3.39 0 0 0 13.07 4.59A5 5 0 0 1 13.07 10.41A3.39 3.39 0 0 0 15 11A3.5 3.5 0 0 0 15 4Z" />
+            </svg>
+        </div>
+        <div class="title">
+            <h1>Customers</h1>
+        </div>
+        <div class="menu">
+            <div class="emails">
+                <button>emails</button>
+            </div>
+            <div class="customers">
+                <button>customers</button>
+            </div>
+            <div class="logout">
+                <button>logout</button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <div class="table-filter-container">
+                <div class="table">
+                    <div class="table-title">
+                        <h1>Customers</h1>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Surname</th>
+                                <th>Email</th>
+                                <th>Postal Code</th>
+                                <th>City</th>
+                                <th>Starting Service Date</th>
+                                <th>Province</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Name 1</td>
+                                <td>Surname 1</td>
+                                <td>Email 1</td>
+                                <td>Postal Code 1</td>
+                                <td>City 1</td>
+                                <td>Starting Service Date 1</td>
+                                <td>Province 1</td>
+                            </tr>
+                            <tr>
+                                <td>Name 2</td>
+                                <td>Surname 2</td>
+                                <td>Email 2</td>
+                                <td>Postal Code 2</td>
+                                <td>City 2</td>
+                                <td>Starting Service Date 2</td>
+                                <td>Province 2</td>
+                            </tr>
+                            <tr>
+                                <td>Name 3</td>
+                                <td>Surname 3</td>
+                                <td>Email 3</td>
+                                <td>Postal Code 3</td>
+                                <td>City 3</td>
+                                <td>Starting Service Date 3</td>
+                                <td>Province 3</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="filter">
+                    <h1>Filter</h1>
+                    <form action="/customers" method="POST" id="customers-filter-form">
+                        <label>Postal Code</label>
+                        <input type="text" name="postalCode" placeholder="Postal Code">
+                        <label>Province</label>
+                        <input type="text" name="province" placeholder="Province">
+                        <label>Starting Service Date</label>
+                        <input type="date" name="startingServiceDate" placeholder="Starting Service Date">
+                        <button type="submit" id="filter-submit-button">Filter</button>
+                    </form>
+                </div>
+            </div>
+            <div class="customers-form-container">
+                <h1>Add Customer</h1>
+                <form action="http://127.0.0.1:8080/api/admin/customers" method="POST" id="form">
+                    <div class="field">
+                        <label>Name</label>
+                        <input type="text" name="name" placeholder="Name">
+                    </div>
+                    <div class="field">
+                        <label>Surname</label>
+                        <input type="text" name="surname" placeholder="Surname">
+                    </div>
+                    <div class="field">
+                        <label>Email</label>
+                        <input type="text" name="email" placeholder="Email">
+                    </div>
+                    <div class="field">
+                        <label>Phone Number</label>
+                        <input type="text" name="phone" placeholder="Phone Number">
+                    </div>
+                    <div class="field">
+                        <label>Identify Number</label>
+                        <input type="text" name="identifyNumber" placeholder="Identify Number">
+                    </div>
+                    <div class="field">
+                        <label>Address</label>
+                        <input type="text" name="address" placeholder="Address">
+                    </div>
+                    <div class="field">
+                        <label>Postal Code</label>
+                        <input type="text" name="postalCode" placeholder="Postal Code">
+                    </div>
+                    <div class="field">
+                        <label>City</label>
+                        <input type="text" name="city" placeholder="City">
+                    </div>
+                    <div class="field">
+                        <label>On Service</label>
+                        <input type="checkbox" name="onService" placeholder="On Service">
+                    </div>
+                    <div class="field">
+                        <label>Starting Service Date</label>
+                        <input type="date" name="startingServiceDate" placeholder="Starting Service Date">
+                    </div>
+                    <div class="field">
+                        <label>Province</label>
+                        <input type="text" name="province" placeholder="Province">
+                    </div>
+                </form>
+                <div class="customers-form-buttons">
+                    <button type="submit" form="customers-form" id="form-submit-button">Add</button>
+                    <button type="submit" form="customers-form" id="form-delete-button">Delete</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+</body>
+</html>
