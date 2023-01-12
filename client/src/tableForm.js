@@ -3,7 +3,7 @@ class TableForm extends HTMLElement {
         super();
         this.shadow = this.attachShadow({mode: 'open'});
         this.render();
-        this.obtainData();
+        // this.obtainData();
     }
     render() {
         this.shadow.innerHTML =
@@ -11,10 +11,11 @@ class TableForm extends HTMLElement {
         <style>
 
             .table-form-container {
+                margin: 1rem 4%;
                 display: flex;
-                flex-direction: row;
+                flex-direction: row-reverse;
                 justify-content: space-around;
-                width: 100%;
+                width: 96%;
             }
 
             form {
@@ -25,7 +26,7 @@ class TableForm extends HTMLElement {
             }
 
             caption {
-                font-size: 1.2rem;
+                font-size: 1.4rem;
                 font-weight: 600;
                 background-color: #eee;
                 padding: 10px;
@@ -55,6 +56,11 @@ class TableForm extends HTMLElement {
                 border-collapse: collapse;
             }
 
+            th {
+                background-color: #eee;
+                font-size: 1.4rem;
+            }
+
             th, td {
                 padding: 10px;
                 border: 1px solid #ccc;
@@ -63,42 +69,40 @@ class TableForm extends HTMLElement {
         </style>
         `;
 
+        // FORM
+
         const tableFormContainer = document.createElement('div');
         tableFormContainer.setAttribute('class', 'table-form-container');
 
         const form = document.createElement('form');
 
         const caption = document.createElement('caption');
-        caption.textContent = 'Add a new row';
+        caption.textContent = 'Compose Email';
 
-        const inputName = document.createElement('input');
-        inputName.setAttribute('type', 'text');
-        inputName.setAttribute('placeholder', 'Name');
+        const inputSubject = document.createElement('input');
+        inputSubject.setAttribute('type', 'text');
+        inputSubject.setAttribute('placeholder', 'Subject');
 
-        const inputAge = document.createElement('input');
-        inputAge.setAttribute('type', 'number');
-        inputAge.setAttribute('placeholder', 'Age');
+        const inputContent = document.createElement('input');
+        inputContent.setAttribute('type', 'text');
+        inputContent.setAttribute('placeholder', 'Content');
 
         const button = document.createElement('button');
         button.setAttribute('type', 'submit');
-        button.textContent = 'Add';
+        button.textContent = 'Send';
 
         form.appendChild(caption);
-        form.appendChild(inputName);
-        form.appendChild(inputAge);
+        form.appendChild(inputSubject);
+        form.appendChild(inputContent);
         form.appendChild(button);
 
         tableFormContainer.appendChild(form);
 
+        // TABLE
+
         const table = document.createElement('table');
 
         const thead = document.createElement('thead');
-
-        const rows = [
-            {name: 'John', age: 20},
-            {name: 'Jane', age: 21},
-            {name: 'Jack', age: 22}
-        ];
 
         const tr = document.createElement('tr');
 
@@ -108,12 +112,56 @@ class TableForm extends HTMLElement {
         const thAge = document.createElement('th');
         thAge.textContent = 'Age';
 
+        console.log(thName.textContent);
+
+        // APPEND
+
         tr.appendChild(thName);
         tr.appendChild(thAge);
 
         thead.appendChild(tr);
 
         const tbody = document.createElement('tbody');
+
+        // // Si el title es Customers, hacemos una llamada fetch a la API para obtener todos los customers.
+
+        // const title = document.querySelector('table-form-component').getAttribute('for');
+
+        // console.log(sessionStorage.getItem('token'));
+
+        // if(title === 'customers') {
+
+        //         fetch('http://127.0.0.1:8080/api/admin/customer/', {
+        //             method: 'GET',
+        //             headers: {
+        //                 'Content-Type': 'application/json',
+        //                 'x-access-token': sessionStorage.getItem('token')
+        //             }
+        //         })
+        //         .then(response => response.json())
+        //         .then(data => {
+        //             console.log(data);
+        //             return this.render(data);
+        //         }
+        //     );
+        // }
+
+        // const rows = data;
+
+        const rows = [
+            {
+                name: 'John',
+                age: 20
+            },
+            {
+                name: 'Jane',
+                age: 25
+            },
+            {
+                name: 'Peter',
+                age: 30
+            }
+        ];
 
         rows.forEach(row => {
             const tr = document.createElement('tr');
@@ -138,30 +186,31 @@ class TableForm extends HTMLElement {
         this.shadow.appendChild(tableFormContainer);
     }
 
-    obtainData() {
+    // obtainData() {
 
-        // Si el title es Customers, hacemos una llamada fetch a la API para obtener todos los customers.
+    //     // Si el title es Customers, hacemos una llamada fetch a la API para obtener todos los customers.
 
-        const title = document.getElementByTagName('header-component')[0].getAttribute('title');
+    //     const title = document.querySelector('table-form-component').getAttribute('for');
 
-        console.log(title);
+    //     console.log(sessionStorage.getItem('token'));
 
-        if(title === 'Customers') {
+    //     if(title === 'customers') {
 
-                fetch('http://localhost:3000/api/admin/customer', {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'x-access-token': localStorage.getItem('token')
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    console.log(data);
-                }
-            );
-        }
-    }
+    //             fetch('http://127.0.0.1:8080/api/admin/customer/', {
+    //                 method: 'GET',
+    //                 headers: {
+    //                     'Content-Type': 'application/json',
+    //                     'x-access-token': sessionStorage.getItem('token')
+    //                 }
+    //             })
+    //             .then(response => response.json())
+    //             .then(data => {
+    //                 console.log(data);
+    //                 return this.render(data);
+    //             }
+    //         );
+    //     }
+    // }
 }
 
 customElements.define('table-form-component', TableForm);

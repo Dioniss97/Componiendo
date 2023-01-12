@@ -8,7 +8,14 @@
     <script type="module" src="src/index.js"></script>
 </head>
 <body>
-    <header-component title="Login"></header-component>
-    <login-form-component url="http://localhost:8080/api/auth/users/signin" redirection="customers.html"></login-form-component>
+
+    <header>
+        <header-component title="Login"></header-component>
+    </header>
+
+    <main>
+        <login-form-component url="http://127.0.0.1:8080/api/auth/users/signin" redirection="send-email.html"></login-form-component>
+    </main>
+
 </body>
 </html>

@@ -4,6 +4,20 @@ class Header extends HTMLElement {
         super();
         this.shadow = this.attachShadow({mode: 'open'});
         this.title = this.getAttribute('title');
+    }
+
+    static get observedAttributes() { return ['title']; }
+
+    connectedCallback() {
+       
+        document.addEventListener("newUrl",( event =>{
+            this.setAttribute('title', event.detail.title);
+        }));
+
+        this.render();
+    }
+
+    attributeChangedCallback(name, oldValue, newValue){
         this.render();
     }
 

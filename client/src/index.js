@@ -1,6 +1,7 @@
 import './header.js';
 import './loginForm.js';
 import './tableForm.js';
+import './nav-menu.js';
 
 // La función define() recibe dos parámetros:
 // 1. El nombre del componente.
