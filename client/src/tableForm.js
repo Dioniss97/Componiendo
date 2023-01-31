@@ -1,10 +1,47 @@
+import {API_URL} from '../config/config.js';
+
 class TableForm extends HTMLElement {
     constructor() {
         super();
         this.shadow = this.attachShadow({mode: 'open'});
-        this.render();
-        // this.obtainData();
+        this.url = this.getAttribute('url');
+        this.data = [];
     }
+
+    static get observedAttributes() { return ['url']; }
+
+    connectedCallback() {
+        document.addEventListener('newUrl', (event) => {
+            this.setAttribute('url', event.detail.url);
+        });
+
+        this.loadData().then(() => this.render());
+    }
+
+    attributeChangedCallback(name, oldValue, newValue){
+        this.loadData().then(() => this.render());
+    }
+
+    async loadData() {
+
+        let url = `${API_URL}${this.getAttribute('url')}`;
+
+        try{
+
+            let response = await fetch(url, {
+                headers: {
+                    'x-access-token': sessionStorage.getItem('accessToken'),
+                }
+            });
+
+            let data = await response.json();
+            this.data = data;
+
+        } catch(error) {
+            console.log(error);
+        }
+    }
+
     render() {
         this.shadow.innerHTML =
         `
@@ -31,6 +68,12 @@ class TableForm extends HTMLElement {
                 background-color: #eee;
                 padding: 10px;
                 border-bottom: 1px solid #ccc;
+            }
+
+            label {
+                font-size: 1.2rem;
+                font-weight: 600;
+                margin: .4rem;
             }
 
             input {
@@ -61,156 +104,161 @@ class TableForm extends HTMLElement {
                 font-size: 1.4rem;
             }
 
+            tr {
+                border-bottom: .2rem solid #ccc;
+            }
+
             th, td {
                 padding: 10px;
                 border: 1px solid #ccc;
             }
 
+            td {
+                text-align: center;
+            }
+
         </style>
         `;
 
-        // FORM
+        let tableFormContainer = document.createElement('div');
+        tableFormContainer.classList.add('table-form-container');
 
-        const tableFormContainer = document.createElement('div');
-        tableFormContainer.setAttribute('class', 'table-form-container');
+        // let formContainer = document.createElement('div');
+        let form = document.createElement('form');
 
-        const form = document.createElement('form');
+        // let tableContainer = document.createElement('div');
+        let table = document.createElement('table');
 
-        const caption = document.createElement('caption');
-        caption.textContent = 'Compose Email';
+        let thead = document.createElement('thead');
+        let tbody = document.createElement('tbody');
 
-        const inputSubject = document.createElement('input');
-        inputSubject.setAttribute('type', 'text');
-        inputSubject.setAttribute('placeholder', 'Subject');
+        let tableStructure = this.setTableStructure();
 
-        const inputContent = document.createElement('input');
-        inputContent.setAttribute('type', 'text');
-        inputContent.setAttribute('placeholder', 'Content');
+        Object.keys(tableStructure.headers).forEach((key) => {
 
-        const button = document.createElement('button');
-        button.setAttribute('type', 'submit');
-        button.textContent = 'Send';
+            let th = document.createElement('th');
+            th.textContent = tableStructure.headers[key].label;
+            thead.appendChild(th);
 
-        form.appendChild(caption);
-        form.appendChild(inputSubject);
-        form.appendChild(inputContent);
-        form.appendChild(button);
-
-        tableFormContainer.appendChild(form);
-
-        // TABLE
-
-        const table = document.createElement('table');
-
-        const thead = document.createElement('thead');
-
-        const tr = document.createElement('tr');
-
-        const thName = document.createElement('th');
-        thName.textContent = 'Name';
-
-        const thAge = document.createElement('th');
-        thAge.textContent = 'Age';
-
-        console.log(thName.textContent);
-
-        // APPEND
-
-        tr.appendChild(thName);
-        tr.appendChild(thAge);
-
-        thead.appendChild(tr);
-
-        const tbody = document.createElement('tbody');
-
-        // // Si el title es Customers, hacemos una llamada fetch a la API para obtener todos los customers.
-
-        // const title = document.querySelector('table-form-component').getAttribute('for');
-
-        // console.log(sessionStorage.getItem('token'));
-
-        // if(title === 'customers') {
-
-        //         fetch('http://127.0.0.1:8080/api/admin/customer/', {
-        //             method: 'GET',
-        //             headers: {
-        //                 'Content-Type': 'application/json',
-        //                 'x-access-token': sessionStorage.getItem('token')
-        //             }
-        //         })
-        //         .then(response => response.json())
-        //         .then(data => {
-        //             console.log(data);
-        //             return this.render(data);
-        //         }
-        //     );
-        // }
-
-        // const rows = data;
-
-        const rows = [
-            {
-                name: 'John',
-                age: 20
-            },
-            {
-                name: 'Jane',
-                age: 25
-            },
-            {
-                name: 'Peter',
-                age: 30
-            }
-        ];
-
-        rows.forEach(row => {
-            const tr = document.createElement('tr');
-
-            const tdName = document.createElement('td');
-            tdName.textContent = row.name;
-
-            const tdAge = document.createElement('td');
-            tdAge.textContent = row.age;
-
-            tr.appendChild(tdName);
-            tr.appendChild(tdAge);
-
-            tbody.appendChild(tr);
         });
 
-        table.appendChild(thead);
-        table.appendChild(tbody);
+        Object.values(this.data).forEach((register) => {
+            
+            let tr = document.createElement('tr');
 
-        tableFormContainer.appendChild(table);
+            Object.keys(tableStructure.headers).forEach((key) => {
+
+            let td = document.createElement('td');
+            td.textContent = register[key];
+
+            tr.appendChild(td);
+            tbody.appendChild(tr);
+
+            });
+        });
+
+
+        Object.keys(tableStructure.filters).forEach((key) => {
+
+            let label = document.createElement('label');
+            label.textContent = tableStructure.filters[key].label;
+
+            let input = document.createElement('input');
+            input.setAttribute('type', tableStructure.filters[key].type);
+            input.setAttribute('name', key);
+            input.setAttribute('placeholder', label.textContent);
+
+            form.appendChild(label);
+            form.appendChild(input);
+        });
+
+        // Appends:
+
+            // Form:
+
+            tableFormContainer.appendChild(form);
+
+            // Table:
+
+            table.appendChild(thead);
+            table.appendChild(tbody);
+    
+            tableFormContainer.appendChild(table);
+
+        // ----------------------------
 
         this.shadow.appendChild(tableFormContainer);
+
     }
 
-    // obtainData() {
+    setTableStructure() {
 
-    //     // Si el title es Customers, hacemos una llamada fetch a la API para obtener todos los customers.
+        let url = this.getAttribute('url');
 
-    //     const title = document.querySelector('table-form-component').getAttribute('for');
+        switch (url) {
 
-    //     console.log(sessionStorage.getItem('token'));
+        case '/api/admin/customers':
 
-    //     if(title === 'customers') {
+            return {
 
-    //             fetch('http://127.0.0.1:8080/api/admin/customer/', {
-    //                 method: 'GET',
-    //                 headers: {
-    //                     'Content-Type': 'application/json',
-    //                     'x-access-token': sessionStorage.getItem('token')
-    //                 }
-    //             })
-    //             .then(response => response.json())
-    //             .then(data => {
-    //                 console.log(data);
-    //                 return this.render(data);
-    //             }
-    //         );
-    //     }
-    // }
+                filters: {
+                    name: {
+                        label: 'Nombre',
+                        type: 'text',
+                    },
+                    surname: {
+                        label: 'Apellidos',
+                        type: 'text',
+                    },
+                    email: {
+                        label: 'Email',
+                        type: 'email',
+                    }
+                },
+                headers:{
+                    email: {
+                        label: 'Email',
+                    },
+                    name: {
+                        label: 'Nombre',
+                    },
+                    surname: {
+                        label: 'Apellidos',
+                    },
+                },
+                buttons: {
+                    edit: true,
+                    remove: true
+                }
+            };
+
+        case '/api/admin/emails':
+
+            return {
+
+                filters: {
+                    subject: {
+                        label: 'Asunto',
+                    },
+                    content: {
+                        label: 'Contenido',
+                    }
+                },
+                headers:{
+                    subject: {
+                        label: 'Asunto',
+                    },
+                    content: {
+                        label: 'Contenido',
+                    }
+                },
+                buttons: {
+                    edit: true,
+                    remove: true
+                }
+            };
+        }
+    }
 }
 
 customElements.define('table-form-component', TableForm);

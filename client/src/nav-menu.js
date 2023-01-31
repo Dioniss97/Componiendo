@@ -1,13 +1,35 @@
 // Un componente js para el menú de navegación para el elemento Send Emails, Add Emails y Add Customers.
+import { API_URL } from '../config/config.js';
 
 class NavMenu extends HTMLElement {
     constructor() {
         super();
         this.shadow = this.attachShadow({mode: 'open'});
+        this.menuItems = [];
     }
 
     connectedCallback() {
-        this.render();
+        this.loadData().then(() => this.render());
+    }
+
+    async loadData() {
+
+        let url = `${API_URL}/api/admin/menus/display/${this.getAttribute("menu")}`;
+
+        try{
+
+            let response = await fetch(url, {
+                headers: {
+                    'x-access-token': sessionStorage.getItem('accessToken'),
+                }
+            });
+
+            let data = await response.json();
+            this.menuItems =  data.menuItems;
+
+        }catch(error){
+            console.log(error);
+        }
     }
 
     render() {
@@ -53,27 +75,23 @@ class NavMenu extends HTMLElement {
 
         const nav = document.createElement('nav');
 
-        const addEmails = document.createElement('div');
-        addEmails.classList.add('menu-item');
-        addEmails.setAttribute('url', '/add-emails');
-        addEmails.textContent = 'Emails';
+        this.menuItems.forEach((item) => {
 
-        const addCustomers = document.createElement('div');
-        addCustomers.classList.add('menu-item');
-        addCustomers.setAttribute('url', '/add-customers');
-        addCustomers.textContent = 'Customers';
+            const menuItem = document.createElement('div');
+            menuItem.classList.add('menu-item');
+            menuItem.setAttribute('url', item.customUrl);
+            menuItem.textContent = item.name;
 
-
-        nav.appendChild(addEmails);
-        nav.appendChild(addCustomers);
+            nav.appendChild(menuItem);
+        });
 
         this.shadow.appendChild(nav);
 
-        let menuItems = this.shadow.querySelectorAll('.menu-item');
+        let elements = this.shadow.querySelectorAll('.menu-item');
 
-        menuItems.forEach((element) => {
-            console.log(element)
+        elements.forEach((element) => {
             element.addEventListener('click', (e) => {
+
                 document.dispatchEvent(new CustomEvent('newUrl', {
                     detail: {
                         url: element.getAttribute('url'),
@@ -82,8 +100,6 @@ class NavMenu extends HTMLElement {
                 }));
             });
         });
-
-
     }
 }
 

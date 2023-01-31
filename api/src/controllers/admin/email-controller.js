@@ -2,6 +2,7 @@ const db = require("../../models");
 const Email = db.Email;
 const Op = db.Sequelize.Op;
 const EmailService = require("../../services/email-service");
+const ImageService = require("../../services/image-service");
 const User = db.User;
 
 exports.create = (req, res) => {
@@ -22,7 +23,7 @@ exports.create = (req, res) => {
 
     Email.create(email).then(data => {
 
-        new EmailService().sendEmail(data);
+        new ImageService('email', data.id).uploadImage(req.files);
 
         res.status(200).send(data);
         
@@ -33,19 +34,66 @@ exports.create = (req, res) => {
     });
 };
 
+exports.sendEmail = (req, res) => {
+
+    if (!req.body.subject ||!req.body.content) {
+
+        res.status(400).send({
+            message: "Faltan campos por rellenar."
+        });
+
+        return;
+
+    }
+
+    // No es necesario crear el objeto email, porque ya lo tenemos en la base de datos
+
+    Email.findByPk(req.body.id).then(data => {
+
+        new EmailService().sendEmail(data);
+
+        res.status(200).send(data);
+
+    }).catch(err => {
+        res.status(500).send({
+            message: err.message || "Algún error ha surgido al insertar el dato."
+        });
+    });
+};
+
 exports.findAll = (req, res) => {
 
-    let whereStatement = {};
-
-    let condition = Object.keys(whereStatement).length > 0 ? {[Op.and]: [whereStatement]} : {};
+    let condition = {};
 
     Email.findAll({ where: condition }).then(data => {
+
+        // let images = new ImageService('email', data.id).getImages(data);
+
+        // data.dataValues.images = images;
+
         res.status(200).send(data);
     }).catch(err => {
         res.status(500).send({
             message: err.message || "Algún error ha surgido al recuperar los datos."
         });
     });
+
+    // let whereStatement = {};
+
+    // let condition = Object.keys(whereStatement).length > 0 ? {[Op.and]: [whereStatement]} : {};
+
+    // Email.findAll({ where: condition }).then(data => {
+
+    //     let images = new ImageService('email', data.id).getImages(data);
+
+    //     data.dataValues.images = images;
+
+    //     res.status(200).send(data);
+    // }).catch(err => {
+    //     res.status(500).send({
+    //         message: err.message || "Algún error ha surgido al recuperar los datos."
+    //     });
+    // });
 };
 
 exports.findOne = (req, res) => {

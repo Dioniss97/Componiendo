@@ -89,7 +89,7 @@ class LoginForm extends HTMLElement {
         .then(res => res.json())
         .then(data => {
             // Guardamos el token en el sessionStorage
-            sessionStorage.setItem('token', data.accessToken);
+            sessionStorage.setItem('accessToken', data.accessToken);
             window.location.href = this.getAttribute('redirection');
         })
         .catch(err => console.log(err));

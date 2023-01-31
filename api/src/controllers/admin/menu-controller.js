@@ -1,60 +1,52 @@
 const db = require("../../models");
-const bcrypt = require("bcryptjs");
-const User = db.User;
+const Menu = db.Menu;
 const Op = db.Sequelize.Op;
-const ImageService = require("../../services/image-service");
 
-exports.create = (req, res) => {
+exports.create = async (req, res) => {
 
-    if (!req.body.name || !req.body.email || !req.body.password) {
-
-        res.status(400).send({
-            message: "Faltan campos por rellenar."
+    try{
+        let data = await Menu.create(req.body);
+        res.status(200).send(data);
+    }catch(error){
+        res.status(500).send({
+            message: error.message || "Algún error ha surgido al insertar el dato.",
+            errors: error.errors
         });
-
-        return;
     }
-
-    User.findOne({
-        where: {
-          email: req.body.email
-        }
-      }).then(data => {
-
-        if (data) {
-           
-            res.status(400).send({
-                message: "El email ya existe."
-            });
-
-        }else {
-
-            const user = {
-                name: req.body.name,
-                email: req.body.email,
-                password: bcrypt.hashSync(req.body.password, 8),
-            };
-
-            User.create(user).then(data => {
-
-                new ImageService('email', data.id).uploadImage(req.files);
-
-                res.status(200).send(data);
-            }).catch(err => {
-                res.status(500).send({
-                    message: err.message || "Algún error ha surgido al insertar el dato."
-                });
-            });
-        }  
-    });
 };
 
-exports.findAll = (req, res) => {
+exports.findAll = async (req, res) => {
 
-    var condition = {};
+    let page = req.query.page || 1;
+    let limit = req.query.size || 10;
+    let offset = (page - 1) * limit;
+    let whereStatement = {};
 
-    User.findAll({ where: condition }).then(data => {
-        res.status(200).send(data);
+    for (let key in req.query) {
+        if (req.query[key] != "" && key != "page" && key != "size") {
+            whereStatement[key] = {[Op.substring]: req.query[key]};
+        }
+    }
+
+    let condition = Object.keys(whereStatement).length > 0 ? {[Op.and]: [whereStatement]} : {};
+
+    Menu.findAndCountAll({
+        where: condition, 
+        attributes: ['id', 'name'],
+        limit: limit,
+        offset: offset,
+        order: [['createdAt', 'DESC']]
+    })
+    .then(result => {
+
+        result.meta = {
+            total: result.count,
+            pages: Math.ceil(result.count / limit),
+            currentPage: page
+        };
+
+        res.status(200).send(result);
+
     }).catch(err => {
         res.status(500).send({
             message: err.message || "Algún error ha surgido al recuperar los datos."
@@ -66,7 +58,7 @@ exports.findOne = (req, res) => {
 
     const id = req.params.id;
 
-    User.findByPk(id).then(data => {
+    Menu.findByPk(id).then(data => {
 
         if (data) {
             res.status(200).send(data);
@@ -87,7 +79,7 @@ exports.update = (req, res) => {
 
     const id = req.params.id;
 
-    User.update(req.body, {
+    Menu.update(req.body, {
         where: { id: id }
     }).then(num => {
         if (num == 1) {
@@ -110,7 +102,7 @@ exports.delete = (req, res) => {
 
     const id = req.params.id;
 
-    User.destroy({
+    Menu.destroy({
         where: { id: id }
     }).then(num => {
         if (num == 1) {
@@ -128,3 +120,30 @@ exports.delete = (req, res) => {
         });
     });
 };
+
+exports.getMenuItems = (req, res) => {
+
+    const menuName = req.params.name;
+
+    Menu.findOne({
+        where: { name: menuName },
+        include: [{
+            model: db.MenuItem,
+            as: 'menuItems'
+        }]
+    }).then(data => {
+            
+        if (data) {
+            res.status(200).send(data);
+        } else {
+            res.status(404).send({
+                message: `No se puede encontrar el elemento con el nombre=${menuName}.`
+            });
+        }
+
+    }).catch(err => {
+        res.status(500).send({
+            message: "Algún error ha surgido al recuperar el nombre=" + menuName
+        });
+    });
+}

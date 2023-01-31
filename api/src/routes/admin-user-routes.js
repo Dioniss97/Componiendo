@@ -1,4 +1,4 @@
-module.exports = app => {
+module.exports = (app, upload)  => {
 
     const controller = require("../controllers/admin/user-controller.js");
     var router = require("express").Router();
@@ -11,12 +11,16 @@ module.exports = app => {
         );
         next();
     });
-  
-    router.post("/", [authJwt.verifyUserToken], controller.create);
+
+    let uploadFields = upload.fields([
+        {name: 'avatar', maxCount: 1},
+    ])
+
+    router.post("/", [uploadFields], controller.create);
     router.get("/", [authJwt.verifyUserToken], controller.findAll);
     router.get("/:id", [authJwt.verifyUserToken], controller.findOne);
     router.put("/:id", [authJwt.verifyUserToken], controller.update);
     router.delete("/:id", [authJwt.verifyUserToken], controller.delete);
-  
+
     app.use('/api/admin/users', router);
 };

@@ -1,60 +1,52 @@
 const db = require("../../models");
-const bcrypt = require("bcryptjs");
-const User = db.User;
+const MenuItem = db.MenuItem;
 const Op = db.Sequelize.Op;
-const ImageService = require("../../services/image-service");
 
-exports.create = (req, res) => {
+exports.create = async (req, res) => {
 
-    if (!req.body.name || !req.body.email || !req.body.password) {
-
-        res.status(400).send({
-            message: "Faltan campos por rellenar."
+    try{
+        let data = await MenuItem.create(req.body);
+        res.status(200).send(data);
+    }catch(error){
+        res.status(500).send({
+            message: error.message || "Algún error ha surgido al insertar el dato.",
+            errors: error.errors
         });
-
-        return;
     }
-
-    User.findOne({
-        where: {
-          email: req.body.email
-        }
-      }).then(data => {
-
-        if (data) {
-           
-            res.status(400).send({
-                message: "El email ya existe."
-            });
-
-        }else {
-
-            const user = {
-                name: req.body.name,
-                email: req.body.email,
-                password: bcrypt.hashSync(req.body.password, 8),
-            };
-
-            User.create(user).then(data => {
-
-                new ImageService('email', data.id).uploadImage(req.files);
-
-                res.status(200).send(data);
-            }).catch(err => {
-                res.status(500).send({
-                    message: err.message || "Algún error ha surgido al insertar el dato."
-                });
-            });
-        }  
-    });
 };
 
-exports.findAll = (req, res) => {
+exports.findAll = async (req, res) => {
 
-    var condition = {};
+    let page = req.query.page || 1;
+    let limit = req.query.size || 10;
+    let offset = (page - 1) * limit;
+    let whereStatement = {};
 
-    User.findAll({ where: condition }).then(data => {
-        res.status(200).send(data);
+    for (let key in req.query) {
+        if (req.query[key] != "" && key != "page" && key != "size") {
+            whereStatement[key] = {[Op.substring]: req.query[key]};
+        }
+    }
+
+    let condition = Object.keys(whereStatement).length > 0 ? {[Op.and]: [whereStatement]} : {};
+
+    MenuItem.findAndCountAll({
+        where: condition, 
+        attributes: ['id', 'name', 'customUrl'],
+        limit: limit,
+        offset: offset,
+        order: [['createdAt', 'DESC']]
+    })
+    .then(result => {
+
+        result.meta = {
+            total: result.count,
+            pages: Math.ceil(result.count / limit),
+            currentPage: page
+        };
+
+        res.status(200).send(result);
+
     }).catch(err => {
         res.status(500).send({
             message: err.message || "Algún error ha surgido al recuperar los datos."
@@ -66,7 +58,7 @@ exports.findOne = (req, res) => {
 
     const id = req.params.id;
 
-    User.findByPk(id).then(data => {
+    MenuItem.findByPk(id).then(data => {
 
         if (data) {
             res.status(200).send(data);
@@ -87,7 +79,7 @@ exports.update = (req, res) => {
 
     const id = req.params.id;
 
-    User.update(req.body, {
+    MenuItem.update(req.body, {
         where: { id: id }
     }).then(num => {
         if (num == 1) {
@@ -110,7 +102,7 @@ exports.delete = (req, res) => {
 
     const id = req.params.id;
 
-    User.destroy({
+    MenuItem.destroy({
         where: { id: id }
     }).then(num => {
         if (num == 1) {
