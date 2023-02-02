@@ -123,9 +123,6 @@ class TableForm extends HTMLElement {
         let tableFormContainer = document.createElement('div');
         tableFormContainer.classList.add('table-form-container');
 
-        // let formContainer = document.createElement('div');
-        let form = document.createElement('form');
-
         // let tableContainer = document.createElement('div');
         let table = document.createElement('table');
 
@@ -157,26 +154,7 @@ class TableForm extends HTMLElement {
             });
         });
 
-
-        Object.keys(tableStructure.filters).forEach((key) => {
-
-            let label = document.createElement('label');
-            label.textContent = tableStructure.filters[key].label;
-
-            let input = document.createElement('input');
-            input.setAttribute('type', tableStructure.filters[key].type);
-            input.setAttribute('name', key);
-            input.setAttribute('placeholder', label.textContent);
-
-            form.appendChild(label);
-            form.appendChild(input);
-        });
-
         // Appends:
-
-            // Form:
-
-            tableFormContainer.appendChild(form);
 
             // Table:
 
@@ -201,20 +179,6 @@ class TableForm extends HTMLElement {
 
             return {
 
-                filters: {
-                    name: {
-                        label: 'Nombre',
-                        type: 'text',
-                    },
-                    surname: {
-                        label: 'Apellidos',
-                        type: 'text',
-                    },
-                    email: {
-                        label: 'Email',
-                        type: 'email',
-                    }
-                },
                 headers:{
                     email: {
                         label: 'Email',
@@ -236,14 +200,6 @@ class TableForm extends HTMLElement {
 
             return {
 
-                filters: {
-                    subject: {
-                        label: 'Asunto',
-                    },
-                    content: {
-                        label: 'Contenido',
-                    }
-                },
                 headers:{
                     subject: {
                         label: 'Asunto',
