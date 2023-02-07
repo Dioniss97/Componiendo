@@ -6,6 +6,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <script type="module" src="src/index.js"></script>
+    <style>
+        
+        .tableForm-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+        }
+
+        table-component {
+            width: 100%;
+            height: 100%;
+            align-items: center;
+            margin: 2rem 1rem;
+        }
+
+        form-component {
+            width: 100%;
+            height: 100%;
+            margin: 2rem 1rem;
+        }
+
+    </style>
 </head>
 <body>
 
@@ -15,7 +40,10 @@
     </header>
 
     <main>
-        <table-form-component url="/api/admin/customers"></table-form-component>
+        <div class="tableForm-container">
+            <table-component url="/api/admin/customers"></table-component>
+            <form-component url="/api/admin/users"></form-component>
+        </div>
     </main>
 
 </body>

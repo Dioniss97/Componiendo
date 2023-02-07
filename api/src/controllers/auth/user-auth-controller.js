@@ -13,8 +13,6 @@ exports.signin = (req, res) => {
     })
     .then(user => {
 
-        console.log(req.body.email);
-
         if (!user) {
 
             return res.status(404).send({ message: "Usuario o contraseña incorrecta" });
