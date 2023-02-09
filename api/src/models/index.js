@@ -8,8 +8,6 @@ const path = require('path');
 const basename = path.basename(__filename);
 const db = {};
 
-console.log(process.env);
-
 const sequelize = new Sequelize(process.env.DATABASE_NAME, process.env.DATABASE_USER, process.env.DATABASE_PASSWORD, {
    
     host: process.env.DATABASE_HOST,

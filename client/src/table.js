@@ -16,6 +16,12 @@ class Table extends HTMLElement {
             this.setAttribute('url', event.detail.url);
         });
 
+        document.addEventListener('updateTable', (event) => {
+
+            this.loadData().then(() => this.render());
+
+        });
+
         this.loadData().then(() => this.render());
     }
 
@@ -82,6 +88,74 @@ class Table extends HTMLElement {
                 width: 1.5rem;
                 height: 1.5rem;
                 cursor: pointer;
+            }
+
+            .modal-container {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, .5);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 3;
+            }
+
+            .hidden {
+                display: none;
+            }
+
+            .modal {
+                width: 400px;
+                height: 200px;
+                background-color: #fff;
+                border-radius: 10px;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                align-items: center;
+                padding: 20px;
+            }
+
+            .modal-text {
+                font-size: 1.4rem;
+                font-weight: 600;
+            }
+
+            .modal-buttons {
+                display: flex;
+                justify-content: space-between;
+                width: 100%;
+            }
+
+            .modal-button-confirm {
+                background-color: #0f0;
+                border: none;
+                border-radius: 5px;
+                padding: 10px;
+                font-size: 1.2rem;
+                font-weight: 600;
+                cursor: pointer;
+            }
+
+            .modal-button-cancel {
+                background-color: #f00;
+                border: none;
+                border-radius: 5px;
+                padding: 10px;
+                font-size: 1.2rem;
+                font-weight: 600;
+                cursor: pointer;
+            }
+
+            .modal-button-confirm:hover {
+                background-color: #0c0;
+            }
+
+            .modal-button-cancel:hover {
+                background-color: #c00;
             }
 
         </style>
@@ -153,14 +227,7 @@ class Table extends HTMLElement {
 
                             button.addEventListener('click', (e) => {
 
-                                document.dispatchEvent(new CustomEvent('fillForm', {detail: {id: register.id, url: this.getAttribute('url'), method: 'GET'}}));
-
-                                e.preventDefault();
-
-                                let id = e.target.getAttribute('data-id');
-
-                                // A partir de aquí se debe lanzar un evento personalizado para que el formulario se rellene con los datos del registro. Y solo
-                                // cuando se pulse el botón de guardar se debe enviar la petición PUT.
+                                document.dispatchEvent(new CustomEvent('fillForm', {detail: {id: button.dataset.id}}));
 
                             });
                         
@@ -171,26 +238,9 @@ class Table extends HTMLElement {
 
                             button.addEventListener('click', (e) => {
 
-                                document.dispatchEvent(new CustomEvent('fillForm', {detail: {id: register.id, url: this.getAttribute('url'), load: false}}));
+                                console.log('remove');
 
-                                e.preventDefault();
-
-                                let id = e.target.getAttribute('data-id');
-
-                                // A partir de aquí se debe lanzar un evento personalizado para que aparezca un modal de confirmación. Y solo
-                                // cuando se pulse el botón de confirmar se debe enviar la petición DELETE.
-
-                                fetch(API_URL + this.url + '/' + id, {
-                                    method: 'DELETE',
-                                }).then((response) => {
-
-                                    if (response.status === 200) {
-
-                                        this.render();
-
-                                    }
-
-                                });
+                                document.dispatchEvent(new CustomEvent('loadModal', {detail: {id: button.dataset.id}}));
 
                             });
 

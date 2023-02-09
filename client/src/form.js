@@ -17,9 +17,9 @@ class FormBuilder extends HTMLElement {
 
         document.addEventListener("fillForm", (event => {
 
-            console.log(event.detail.method, event.detail.id);
+            console.log(event.detail.id);
 
-            this.loadData(event.detail.method, event.detail.id);
+            this.loadData(event.detail.id, event.detail.method);
 
         }));
     }
@@ -29,9 +29,12 @@ class FormBuilder extends HTMLElement {
         await this.render();
     }
 
-    async loadData(method, id) {
+    async loadData(id) {
 
         let url = `${API_URL}${this.getAttribute('url')}`;
+
+        let form = this.shadow.querySelector('form');
+        let formData = new FormData();
 
         try {
 
@@ -39,12 +42,22 @@ class FormBuilder extends HTMLElement {
                 headers: {
                     'x-access-token': sessionStorage.getItem('accessToken'),
                 },
-                method: method
+                method: 'GET'
             });
 
             let data = await response.json();
-            console.log(data);
+            console.log(JSON.stringify(data));
             this.data = data;
+
+            if (response.status === 200) {
+                for (let key in data) {
+                    if (form.elements[key]) {
+                        form.elements[key].value = data[key];
+                        console.log(key + ' ' + data[key]);
+                    }
+                }
+            }
+
 
         } catch(error) {
             console.log(error);
@@ -97,7 +110,7 @@ class FormBuilder extends HTMLElement {
                 cursor: pointer;
                 height: 2.5rem;
                 width: 2.5rem;
-                fill: #ccc;
+                fill: #4a4a4a;
             }
 
             .tabs-container-buttons svg:hover{
@@ -546,6 +559,10 @@ class FormBuilder extends HTMLElement {
                         formElementInput.appendChild(select);
                     }
 
+                    // if (formElement.element === 'button') {
+
+                    //     const button = document.createElement('button');
+
                     tabPanelRow.appendChild(formElementContainer);
                 };
 
@@ -557,8 +574,9 @@ class FormBuilder extends HTMLElement {
         this.shadow.querySelector(".tab-panel").classList.add("active");
       
         this.renderTabs();
-        // this.renderSubmitForm();
+        this.renderSubmitForm() ;
         // this.renderCreateForm();
+
     }
 
     renderTabs = () => {
@@ -588,6 +606,53 @@ class FormBuilder extends HTMLElement {
         });
     }
 
+    async renderSubmitForm() {
+
+        this.shadow.querySelector('#store-button').addEventListener('click', async event => {
+            
+            event.preventDefault();
+
+            let url = `${API_URL}${this.getAttribute('url')}/`;
+
+            let form = this.shadow.querySelector('form');
+            let formData = new FormData(form);
+            let data = {};
+    
+            formData.forEach((value, key) => {
+                data[key] = value;
+            });
+
+            console.log(JSON.stringify(data));
+            console.log(url);
+    
+            try {
+    
+                let response = await fetch(url, {
+                    headers: {
+                        'x-access-token': sessionStorage.getItem('accessToken'),
+                        'Content-Type': 'application/json'
+                    },
+                    method: 'POST',
+                    body: JSON.stringify(data)
+                });
+
+                if(response.status === 200){
+
+                    // Añadimos un evento personalizado para actualizar la tabla:
+                    document.dispatchEvent(new CustomEvent('updateTable', {}));
+                   
+                    this.render();
+
+                }else{
+                    console.log('Error al guardar el registro');
+                }
+    
+            } catch(error) {
+                console.log(error);
+            }
+        });
+    }
+
     setFormStructure = async () => {
         
         let url = this.getAttribute('url');
@@ -612,10 +677,6 @@ class FormBuilder extends HTMLElement {
                             rows:{
                                 row1: {
                                     formElements:{
-                                        id:{
-                                            element: 'input',
-                                            type: 'hidden',
-                                        },
                                         name: {
                                             label: 'Nombre',
                                             element: 'input',
@@ -668,7 +729,7 @@ class FormBuilder extends HTMLElement {
                                             type: 'text',
                                             validate: 'only-letters'
                                         },
-                                        township: {
+                                        city: {
                                             label: 'Ciudad',
                                             element: 'input',
                                             type: 'text',
@@ -722,14 +783,6 @@ class FormBuilder extends HTMLElement {
                                             element: 'textarea',
                                         }
                                     }
-                                },
-                                row8: {
-                                    formElements:{
-                                        id:{
-                                            element: 'input',
-                                            type: 'hidden',
-                                        },
-                                    }
                                 }
                             }
                         },
@@ -768,10 +821,6 @@ class FormBuilder extends HTMLElement {
                             rows:{
                                 row1: {
                                     formElements:{
-                                        id:{
-                                            element: 'input',
-                                            type: 'hidden',
-                                        },
                                         subject: {
                                             label: 'Asunto',
                                             element: 'input',
