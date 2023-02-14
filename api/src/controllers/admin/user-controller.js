@@ -51,13 +51,33 @@ exports.create = (req, res) => {
 
 exports.findAll = (req, res) => {
 
-    var condition = {};
+    let page = req.query.page || 1;
+    let limit = parseInt(req.query.size) || 10;
+    let offset = (page - 1) * limit;
 
-    User.findAll({ where: condition }).then(data => {
-        res.status(200).send(data);
+    let whereStatement = {};
+    let condition = Object.keys(whereStatement).length > 0 ? {[Op.and]: [whereStatement]} : {};
+
+    User.findAndCountAll({
+        where: condition,
+        attributes: ['id', 'name', 'email'],
+        limit: limit,
+        offset: offset,
+        order: [['createdAt', 'DESC']]
+    })
+    .then(result => {
+
+        result.meta = {
+            total: result.count,
+            pages: Math.ceil(result.count / limit),
+            currentPage: page
+        };
+
+        res.status(200).send(result);
+
     }).catch(err => {
         res.status(500).send({
-            message: err.message || "Algún error ha surgido al recuperar los datos."
+            message: err.errors || "Algún error ha surgido al recuperar los datos."
         });
     });
 };
@@ -66,7 +86,9 @@ exports.findOne = (req, res) => {
 
     const id = req.params.id;
 
-    User.findByPk(id).then(data => {
+    User.findByPk(id, {
+        attributes: ['id', 'name', 'email']
+    }).then(data => {
 
         if (data) {
             res.status(200).send(data);

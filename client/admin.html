@@ -10,22 +10,18 @@
         
         .tableForm-container {
             display: flex;
-            flex-direction: column;
             justify-content: space-between;
-            align-items: center;
             width: 100%;
             height: 100%;
         }
 
-        table-component {
-            width: 100%;
+        .table {
+            width: 50%;
             height: 100%;
-            align-items: center;
-            margin: 2rem 1rem;
         }
 
-        form-component {
-            width: 100%;
+        .form {
+            width: 50%;
             height: 100%;
             margin: 2rem 1rem;
         }
@@ -35,16 +31,20 @@
 <body>
 
     <header>
-        <header-component title="Send Emails"></header-component>
-        <nav-menu-component menu="admin-header"></nav-menu-component>
+        <header-component title="Send Emails"></header-component> 
+        <nav-menu-component menu="admin-header"></nav-menu-component> 
     </header>
 
     <main>
         <div class="tableForm-container">
-            <table-component url="/api/admin/emails"></table-component>
-            <form-component url="/api/admin/emails"></form-component>
+            <div class="table">
+                <table-component url="/api/admin/emails"></table-component> 
+            </div>
+            <div class="form">
+                <form-component url="/api/admin/emails"></form-component>
+            </div>
         </div>
-        <modal-component></modal-component>
+        <modal-component></modal-component> 
     </main>
 
 </body>

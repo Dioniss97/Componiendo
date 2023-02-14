@@ -17,9 +17,9 @@ class FormBuilder extends HTMLElement {
 
         document.addEventListener("fillForm", (event => {
 
-            console.log(event.detail.id);
+            this.id = event.detail.id;
 
-            this.loadData(event.detail.id, event.detail.method);
+            this.loadData(event.detail.id);
 
         }));
     }
@@ -31,29 +31,25 @@ class FormBuilder extends HTMLElement {
 
     async loadData(id) {
 
-        let url = `${API_URL}${this.getAttribute('url')}`;
-
+        let url = `${API_URL}${this.getAttribute('url')}/${id}`;
         let form = this.shadow.querySelector('form');
-        let formData = new FormData();
 
         try {
 
-            let response = await fetch(url + '/' + id, {
+            let response = await fetch(url, {
                 headers: {
                     'x-access-token': sessionStorage.getItem('accessToken'),
-                },
-                method: 'GET'
+                }
             });
 
             let data = await response.json();
-            console.log(JSON.stringify(data));
             this.data = data;
+            console.log(data);
 
             if (response.status === 200) {
                 for (let key in data) {
                     if (form.elements[key]) {
                         form.elements[key].value = data[key];
-                        console.log(key + ' ' + data[key]);
                     }
                 }
             }
@@ -612,7 +608,8 @@ class FormBuilder extends HTMLElement {
             
             event.preventDefault();
 
-            let url = `${API_URL}${this.getAttribute('url')}/`;
+            let url = this.id ? `${API_URL}${this.getAttribute('url')}/${this.id}`:`${API_URL}${this.getAttribute('url')}`;
+            let method = this.id ? 'PUT' : 'POST';
 
             let form = this.shadow.querySelector('form');
             let formData = new FormData(form);
@@ -632,14 +629,14 @@ class FormBuilder extends HTMLElement {
                         'x-access-token': sessionStorage.getItem('accessToken'),
                         'Content-Type': 'application/json'
                     },
-                    method: 'POST',
+                    method: method,
                     body: JSON.stringify(data)
                 });
 
                 if(response.status === 200){
 
                     // Añadimos un evento personalizado para actualizar la tabla:
-                    document.dispatchEvent(new CustomEvent('updateTable', {}));
+                    document.dispatchEvent(new CustomEvent('updateTable'));
                    
                     this.render();
 
@@ -1120,14 +1117,6 @@ class FormBuilder extends HTMLElement {
                             rows: {
                                 row1: {
                                     formElements:{
-                                        name: {
-                                            label: 'Nombre',
-                                            element: 'input',
-                                            type: 'text',
-                                            placeholder: '',
-                                            required: true,
-                                            validate: 'text'
-                                        },
                                         email: {
                                             label: 'Email',
                                             element: 'input',
@@ -1135,6 +1124,32 @@ class FormBuilder extends HTMLElement {
                                             placeholder: '',
                                             required: true,
                                             validate: 'email'
+                                        },
+                                        name: {
+                                            label: 'Nombre',
+                                            element: 'input',
+                                            type: 'text',
+                                            placeholder: '',
+                                            required: true,
+                                            validate: 'text'
+                                        }
+                                    }
+                                },
+                                row2: {
+                                    formElements:{
+                                        password: {
+                                            label: 'Contraseña',
+                                            element: 'input',
+                                            type: 'text',
+                                            placeholder: '',
+                                            required: true
+                                        },
+                                        repeatPassword: {
+                                            label: 'Repita la contraseña',
+                                            element: 'input',
+                                            type: 'password',
+                                            placeholder: '',
+                                            required: true
                                         }
                                     }
                                 }

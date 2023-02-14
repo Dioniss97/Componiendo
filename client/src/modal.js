@@ -1,4 +1,4 @@
-import {API_URL} from './config.js';
+import {API_URL} from '../config/config.js';
 
 class Modal extends HTMLElement {
 
@@ -10,8 +10,9 @@ class Modal extends HTMLElement {
     connectedCallback() {
 
         document.addEventListener('loadModal', (event => {
-            console.log('loadModal');
             this.render();
+            this.setAttribute('id', event.detail.id);
+            this.setAttribute('url', event.detail.customUrl);
         }));
     }
 
@@ -19,36 +20,132 @@ class Modal extends HTMLElement {
         this.shadow.innerHTML =
         `
         <style>
-            .modal {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background-color: rgba(0,0,0,0.5);
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                z-index: 999;
-            }
-            .modal-content {
-                background-color: #fff;
-                padding: 20px;
-                border-radius: 5px;
-                width: 500px;
-            }
-            .close {
-                position: absolute;
-                top: 10px;
-                right: 10px;
-                cursor: pointer;
-            }
+
+        .modal-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 3;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .modal {
+            width: 400px;
+            height: 200px;
+            background-color: #fff;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-text {
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .modal-button-confirm {
+            background-color: #0f0;
+            border: none;
+            border-radius: 5px;
+            padding: 10px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .modal-button-cancel {
+            background-color: #f00;
+            border: none;
+            border-radius: 5px;
+            padding: 10px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .modal-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 3;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .modal {
+            width: 400px;
+            height: 200px;
+            background-color: #fff;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-text {
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .modal-button-confirm, .modal-button-cancel {
+            background-color: #fff;
+            border: 1px solid #000;
+            border-radius: 5px;
+            padding: 10px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 1rem;
+        }
+
+        .modal-button-confirm:hover {
+            background-color: #ccc;
+            color: #fff;
+        }
+
+        .modal-button-cancel:hover {
+            background-color: #ccc;
+            color: #fff;
+        }
+
         </style>
         `;
 
-        console.log('loadModal');
-
-        e.preventDefault();
+        event.preventDefault();
 
         const modalContainer = document.createElement('div');
         modalContainer.classList.add('modal-container');
@@ -86,6 +183,8 @@ class Modal extends HTMLElement {
 
                     e.preventDefault();
 
+                    (button.classList.contains('modal-button-confirm')) ? this.removeData() : console.log('cancel');
+
                     modalContainer.classList.add('hidden');
 
                 });
@@ -99,7 +198,33 @@ class Modal extends HTMLElement {
 
         // ----------------------------
 
-        document.body.appendChild(modalContainer);
+        this.shadow.appendChild(modalContainer);
+
+    }
+
+    // Fetch para el "remove":
+
+    removeData() {
+
+        let customUrl = this.getAttribute('url');
+        let id = this.getAttribute('id');
+
+        let url = `${API_URL}${customUrl}/${id}`;
+        console.log(url);
+
+        fetch(url, {
+            method: 'DELETE',
+            headers: {
+                'x-access-token': sessionStorage.getItem('accessToken')
+            }
+        }).then((response) => {
+            return response.json();
+        }).then((data) => {
+            console.log(data);
+            document.dispatchEvent(new CustomEvent('updateTable'));
+        }).catch((error) => {
+            console.log(error);
+        });
 
     }
 

@@ -40,6 +40,10 @@ exports.create = (req, res) => {
 
 exports.findAll = (req, res) => {
 
+    let page = req.query.page || 1;
+    let limit =  parseInt(req.query.size) || 10;
+    let offset = (page - 1) * limit;
+
     let whereStatement = {};
     whereStatement.onService = true;
 
@@ -54,11 +58,25 @@ exports.findAll = (req, res) => {
 
     let condition = Object.keys(whereStatement).length > 0 ? {deletedAt: null} : { [Op.and]: [whereStatement, {deletedAt: null}] };
 
-    Customer.findAll({ where: condition }).then(data => {
-        res.status(200).send(data);
+    Customer.findAndCountAll({
+        where: condition,
+        limit: limit,
+        offset: offset,
+        order: [['createdAt', 'DESC']]
+    })
+    .then(result => {
+
+        result.meta = {
+            total: result.count,
+            pages: Math.ceil(result.count / limit),
+            currentPage: page
+        };
+
+        res.status(200).send(result);
+
     }).catch(err => {
         res.status(500).send({
-            message: err.message || "Algún error ha surgido al recuperar los datos."
+            message: err.errors || "Algún error ha surgido al recuperar los datos."
         });
     });
 };

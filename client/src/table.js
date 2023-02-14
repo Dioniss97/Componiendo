@@ -7,6 +7,9 @@ class Table extends HTMLElement {
         this.url = this.getAttribute('url');
         this.data = [];
         this.keys = [];
+        this.total = null;
+        this.lastPage = null;
+        this.currentPage = null;
     }
 
     static get observedAttributes() { return ['url']; } // Here is where we tell the browser to watch for changes to the url attribute
@@ -18,7 +21,10 @@ class Table extends HTMLElement {
 
         document.addEventListener('updateTable', (event) => {
 
-            this.loadData().then(() => this.render());
+            this.loadData().then(() => {
+                this.renderPaginationButtons();
+                this.render();
+            });
 
         });
 
@@ -42,6 +48,12 @@ class Table extends HTMLElement {
             });
 
             let data = await response.json();
+            // console.log(data.meta);
+            
+            this.rows = data.rows;
+            this.total = data.meta.total;
+            this.lastPage = data.meta.pages;
+            this.currentPage = data.meta.currentPage;
             this.data = data;
 
         } catch(error) {
@@ -64,6 +76,7 @@ class Table extends HTMLElement {
 
             table {
                 border-collapse: collapse;
+                width: 100%;
             }
 
             th {
@@ -90,75 +103,62 @@ class Table extends HTMLElement {
                 cursor: pointer;
             }
 
-            .modal-container {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background-color: rgba(0, 0, 0, .5);
+            .table-pagination {
+                margin-top: 2em;
+            }
+           
+            .table-pagination .table-pagination-info{
+                color: hsl(0, 0%, 0%);
                 display: flex;
-                justify-content: center;
-                align-items: center;
-                z-index: 3;
+                font-family: 'Roboto', sans-serif;
+                justify-content: space-between;
             }
 
-            .hidden {
+            .table-pagination .table-pagination-buttons p{
+                color: hsl(0, 0%, 0%);
+                font-family: 'Roboto', sans-serif;
+                margin: 1rem 0;
+            }
+
+            .table-pagination-info p{
+                margin: 0;
+            }
+       
+            .table-pagination .table-pagination-button{
+                cursor: pointer;
+                margin-right: 1em;
+            }
+       
+            .table-pagination .table-pagination-button:hover{
+                color: hsl(19, 100%, 50%);
+            }
+       
+            .table-pagination .table-pagination-button.inactive{
+                color: hsl(0, 0%, 69%);
+            }
+
+            .disabled {
                 display: none;
             }
 
-            .modal {
-                width: 400px;
-                height: 200px;
-                background-color: #fff;
-                border-radius: 10px;
-                display: flex;
-                flex-direction: column;
-                justify-content: space-between;
-                align-items: center;
-                padding: 20px;
-            }
 
-            .modal-text {
-                font-size: 1.4rem;
-                font-weight: 600;
-            }
-
-            .modal-buttons {
-                display: flex;
-                justify-content: space-between;
-                width: 100%;
-            }
-
-            .modal-button-confirm {
-                background-color: #0f0;
-                border: none;
-                border-radius: 5px;
-                padding: 10px;
-                font-size: 1.2rem;
-                font-weight: 600;
-                cursor: pointer;
-            }
-
-            .modal-button-cancel {
-                background-color: #f00;
-                border: none;
-                border-radius: 5px;
-                padding: 10px;
-                font-size: 1.2rem;
-                font-weight: 600;
-                cursor: pointer;
-            }
-
-            .modal-button-confirm:hover {
-                background-color: #0c0;
-            }
-
-            .modal-button-cancel:hover {
-                background-color: #c00;
-            }
 
         </style>
+        
+        <div class="table-pagination">
+            <div class="table-pagination-info">
+                <div class="table-pagination-total"><p><span id="total-page">${this.total}</span> registros</p></div>
+                <div class="table-pagination-pages"><p>Página <span id="current-page">${this.currentPage}</span> de <span id="last-page">${this.lastPage}</span></p></div>
+            </div>
+            <div class="table-pagination-buttons">
+                <p>
+                    <span class="table-pagination-button" id="firstPageUrl">Primera</span>
+                    <span class="table-pagination-button" id="previousPageUrl">Anterior</span>
+                    <span class="table-pagination-button" id="nextPageUrl">Siguiente</span>
+                    <span class="table-pagination-button" id="lastPageUrl">Última</span>
+                </p>
+            </div>
+        </div>
         `;
 
         let tableContainer = document.createElement('div');
@@ -175,7 +175,7 @@ class Table extends HTMLElement {
 
         let buttons = Object.keys(tableStructure.buttons);
         let headers = Object.keys(tableStructure.headers);
-        let values = Object.values(this.data);
+        let values = Object.values(this.rows);
 
         headers.forEach((key) => {
 
@@ -215,8 +215,6 @@ class Table extends HTMLElement {
 
                     if (tableStructure.buttons[key] === true) {
 
-                        // Si la key es edit o remove, cargamos un svg con el icono correspondiente
-
                         let button = document.createElement('div');
                         button.setAttribute('data-id', register.id);
 
@@ -240,7 +238,7 @@ class Table extends HTMLElement {
 
                                 console.log('remove');
 
-                                document.dispatchEvent(new CustomEvent('loadModal', {detail: {id: button.dataset.id}}));
+                                document.dispatchEvent(new CustomEvent('loadModal', {detail: {id: button.dataset.id, customUrl: this.getAttribute('url')}}));
 
                             });
 
@@ -265,6 +263,83 @@ class Table extends HTMLElement {
         // ----------------------------
 
         this.shadow.appendChild(tableContainer);
+
+        this.renderPaginationButtons();
+
+    }
+
+    renderPaginationButtons() {
+
+        // Tenemos 4 botones:
+        // 
+        //  - Primera
+        //  - Anterior
+        //  - Siguiente
+        //  - Última
+        // 
+        //  - Si estamos en la primera página, el botón de Primera y Anterior estará desactivado.
+        //  - Si estamos en la última página, el botón de Siguiente y Última estará desactivado.
+        //  - Si estamos en cualquier otra página, los 4 botones estarán activados.
+        // 
+        //  - Si el total de registros es menor o igual que el número de registros por página, no se mostrarán los botones de paginación.
+        //  - Si el total de registros es mayor que el número de registros por página, se mostrarán los botones de paginación.
+
+        let firstPageUrl = this.shadow.querySelector('#firstPageUrl');
+        let previousPageUrl = this.shadow.querySelector('#previousPageUrl');
+        let nextPageUrl = this.shadow.querySelector('#nextPageUrl');
+        let lastPageUrl = this.shadow.querySelector('#lastPageUrl');
+
+        console.log(this.data.meta);
+
+        paginationButtons.forEach((button) => {
+
+            let action = button.textContent;
+
+            button.addEventListener('click', (e) => {
+
+                switch (action) {
+
+                    case 'Primera':
+
+                    case 'Anterior':
+
+                    case 'Siguiente':
+
+                    case 'Última':
+                }
+            });
+        });            
+
+
+        // Check if there are multiple pages
+        if (this.data.meta.pages === 1) {
+                
+                // Disable all buttons if there is only one page
+                paginationButtons.forEach((button) => {
+    
+                    button.classList.add('disabled');
+    
+                });
+    
+            } else {
+
+                // If there are multiple pages
+                if (this.data.meta.currentPage === 1) {
+
+                    // Disable First and Previous buttons if on the first page
+                    firstPageUrl.classList.add('disabled');
+                    previousPageUrl.classList.add('disabled');
+
+                } else if (this.data.meta.currentPage === this.data.meta.pages) {
+
+                    // Disable Next and Last buttons if on the last page
+                    nextPageUrl.classList.add('disabled');
+                    lastPageUrl.classList.add('disabled');
+
+                }
+            }
+
+
 
     }
 
