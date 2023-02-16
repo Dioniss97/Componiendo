@@ -611,6 +611,25 @@ class FormBuilder extends HTMLElement {
             let url = this.id ? `${API_URL}${this.getAttribute('url')}/${this.id}`:`${API_URL}${this.getAttribute('url')}`;
             let method = this.id ? 'PUT' : 'POST';
 
+            // Un if dónde vamos a guardar en la variable Table que tabla queremos actualizar:
+
+            if(this.getAttribute('url') === '/api/admin/users'){
+                
+                let table = 'usuario';
+                this.table = table;
+
+            }else if(this.getAttribute('url') === '/api/admin/customers'){
+
+                let table = 'cliente';
+                this.table = table;
+
+            }else if(this.getAttribute('url') === '/api/admin/emails'){
+
+                let table = 'email';
+                this.table = table;
+
+            }
+
             let form = this.shadow.querySelector('form');
             let formData = new FormData(form);
             let data = {};
@@ -619,9 +638,6 @@ class FormBuilder extends HTMLElement {
                 data[key] = value;
             });
 
-            console.log(JSON.stringify(data));
-            console.log(url);
-    
             try {
     
                 let response = await fetch(url, {
@@ -635,9 +651,11 @@ class FormBuilder extends HTMLElement {
 
                 if(response.status === 200){
 
-                    // Añadimos un evento personalizado para actualizar la tabla:
+                    // Añadimos un evento personalizado para actualizar la tabla y otro para mostrar un mensaje de guardado:
                     document.dispatchEvent(new CustomEvent('updateTable'));
-                   
+
+                    document.dispatchEvent(new CustomEvent('saved', {detail: {data: data, table: this.table, action: 'Guardado'}}));
+
                     this.render();
 
                 }else{
@@ -1117,14 +1135,6 @@ class FormBuilder extends HTMLElement {
                             rows: {
                                 row1: {
                                     formElements:{
-                                        email: {
-                                            label: 'Email',
-                                            element: 'input',
-                                            type: 'email',
-                                            placeholder: '',
-                                            required: true,
-                                            validate: 'email'
-                                        },
                                         name: {
                                             label: 'Nombre',
                                             element: 'input',
@@ -1132,6 +1142,14 @@ class FormBuilder extends HTMLElement {
                                             placeholder: '',
                                             required: true,
                                             validate: 'text'
+                                        },
+                                        email: {
+                                            label: 'Email',
+                                            element: 'input',
+                                            type: 'email',
+                                            placeholder: '',
+                                            required: true,
+                                            validate: 'email'
                                         }
                                     }
                                 },

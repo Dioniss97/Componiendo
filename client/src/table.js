@@ -28,6 +28,7 @@ class Table extends HTMLElement {
 
         });
 
+        // Esta línea me parece que no sirve para nada.
         this.loadData().then(() => this.render());
     }
 
@@ -238,6 +239,7 @@ class Table extends HTMLElement {
 
                                 console.log('remove');
 
+
                                 document.dispatchEvent(new CustomEvent('loadModal', {detail: {id: button.dataset.id, customUrl: this.getAttribute('url')}}));
 
                             });
@@ -291,53 +293,53 @@ class Table extends HTMLElement {
 
         console.log(this.data.meta);
 
-        paginationButtons.forEach((button) => {
+        // paginationButtons.forEach((button) => {
 
-            let action = button.textContent;
+        //     let action = button.textContent;
 
-            button.addEventListener('click', (e) => {
+        //     button.addEventListener('click', (e) => {
 
-                switch (action) {
+        //         switch (action) {
 
-                    case 'Primera':
+        //             case 'Primera':
 
-                    case 'Anterior':
+        //             case 'Anterior':
 
-                    case 'Siguiente':
+        //             case 'Siguiente':
 
-                    case 'Última':
-                }
-            });
-        });            
+        //             case 'Última':
+        //         }
+        //     });
+        // });
 
 
         // Check if there are multiple pages
-        if (this.data.meta.pages === 1) {
+        // if (this.data.meta.pages === 1) {
                 
-                // Disable all buttons if there is only one page
-                paginationButtons.forEach((button) => {
+        //         // Disable all buttons if there is only one page
+        //         paginationButtons.forEach((button) => {
     
-                    button.classList.add('disabled');
+        //             button.classList.add('disabled');
     
-                });
+        //         });
     
-            } else {
+        //     } else {
 
-                // If there are multiple pages
-                if (this.data.meta.currentPage === 1) {
+        //         // If there are multiple pages
+        //         if (this.data.meta.currentPage === 1) {
 
-                    // Disable First and Previous buttons if on the first page
-                    firstPageUrl.classList.add('disabled');
-                    previousPageUrl.classList.add('disabled');
+        //             // Disable First and Previous buttons if on the first page
+        //             firstPageUrl.classList.add('disabled');
+        //             previousPageUrl.classList.add('disabled');
 
-                } else if (this.data.meta.currentPage === this.data.meta.pages) {
+        //         } else if (this.data.meta.currentPage === this.data.meta.pages) {
 
-                    // Disable Next and Last buttons if on the last page
-                    nextPageUrl.classList.add('disabled');
-                    lastPageUrl.classList.add('disabled');
+        //             // Disable Next and Last buttons if on the last page
+        //             nextPageUrl.classList.add('disabled');
+        //             lastPageUrl.classList.add('disabled');
 
-                }
-            }
+        //         }
+        //     }
 
 
 

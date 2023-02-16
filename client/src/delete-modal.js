@@ -1,6 +1,6 @@
 import {API_URL} from '../config/config.js';
 
-class Modal extends HTMLElement {
+class deleteModal extends HTMLElement {
 
     constructor() {
         super();
@@ -222,6 +222,9 @@ class Modal extends HTMLElement {
         }).then((data) => {
             console.log(data);
             document.dispatchEvent(new CustomEvent('updateTable'));
+
+            // Pendiente de implementar que envíe el valor de la primera clave del registro a eliminar.
+            document.dispatchEvent(new CustomEvent('saved', {detail: {data: data, table: this.table, action: 'Eliminado'}}));
         }).catch((error) => {
             console.log(error);
         });
@@ -230,4 +233,4 @@ class Modal extends HTMLElement {
 
 }
 
-customElements.define('modal-component', Modal);
+customElements.define('delete-modal-component', deleteModal);
